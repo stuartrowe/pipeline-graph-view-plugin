@@ -1061,31 +1061,32 @@ class StatusAndTimingTest {
         WorkflowJob job = j.jenkins.createProject(WorkflowJob.class, "parallel stages, one skipped job");
         job.setDefinition(new CpsFlowDefinition(
                 """
-                 pipeline {
-                    agent any
-                    stages {
-                        stage('Run Tests') {
-                            parallel {
-                                stage('Test on Windows') {
-                                    when {
-                                        expression { false }
-                                    }
-                                    steps {
-                                        echo 'hello world'
-                                    }
-                                }
-                                stage('Test on Linux') {
-                                    when {
-                                        expression { false }
-                                    }
-                                    steps {
-                                        echo 'hello world'
-                                    }
-                                }
+                 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
+
+                 def when(condition, Closure body) {
+                    if (condition) {
+                       body()
+                    } else {
+                       Utils.markStageSkippedForConditional(STAGE_NAME)
+                    }
+                 }
+
+                 parallel([
+                    "A": {
+                        stage("1") {
+                            when(false) {
+                                echo("A-1")
+                            }
+                        }
+                    },
+                    "B": {
+                        stage("1") {
+                            when(false) {
+                                echo("B-1")
                             }
                         }
                     }
-                 }
+                 ])
                  """,
                 true));
 
