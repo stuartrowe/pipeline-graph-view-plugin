@@ -1056,6 +1056,48 @@ class StatusAndTimingTest {
     }
 
     @Test
+    @Issue("GH#504")
+    void parallelStagesBothSkipped() throws Exception {
+        WorkflowJob job = j.jenkins.createProject(WorkflowJob.class, "parallel stages, one skipped job");
+        job.setDefinition(new CpsFlowDefinition(
+                """
+                 pipeline {
+                    agent any
+                    stages {
+                        stage('Run Tests') {
+                            parallel {
+                                stage('Test on Windows') {
+                                    when {
+                                        expression { false }
+                                    }
+                                    steps {
+                                        echo 'hello world'
+                                    }
+                                }
+                                stage('Test on Linux') {
+                                    when {
+                                        expression { false }
+                                    }
+                                    steps {
+                                        echo 'hello world'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                 }
+                 """,
+                true));
+
+        WorkflowRun build = j.assertBuildStatusSuccess(job.scheduleBuild2(0));
+        StagesAndParallelBranchesVisitor visitor = new StagesAndParallelBranchesVisitor(build);
+        assertEquals(3, visitor.chunks.size());
+        visitor.assertStageOrBranchStatus("Run Tests", GenericStatus.SUCCESS);
+        visitor.assertStageOrBranchStatus("Test on Windows", GenericStatus.NOT_EXECUTED);
+        visitor.assertStageOrBranchStatus("Test on Linux", GenericStatus.NOT_EXECUTED);
+    }
+
+    @Test
     void catchOutsideFailingStage() throws Exception {
         WorkflowJob job = j.jenkins.createProject(WorkflowJob.class, "catchOutsideFailingStage");
         job.setDefinition(new CpsFlowDefinition(
