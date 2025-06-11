@@ -155,4 +155,24 @@ class PipelineGraphViewTest {
                 .scrollToText("Hello, world 1000!")
                 .scrollToText("Hello, world 1!");
     }
+
+    @Issue("GH#504")
+    @Test
+    @ConfiguredWithCode("configure-appearance.yml")
+    void parallelMultipleSkippedStages(Page p, JenkinsConfiguredWithCodeRule j) throws Exception {
+        String name = "gh504";
+        WorkflowRun run = TestUtils.createAndRunJob(
+                j, name, "gh504_parallelMultipleStagesMarkedAsSkipped.jenkinsfile", Result.SUCCESS);
+
+        new PipelineJobPage(p, run.getParent())
+                .goTo()
+                .hasBuilds(1)
+                .nthBuild(0)
+                .goToBuild()
+                .goToPipelineOverview()
+                .hasStagesInGraph(1, "Parallel", "A", "B")
+                .stageHasState("Parallel", PipelineState.SUCCESS)
+                .stageHasState("A", PipelineState.SKIPPED)
+                .stageHasState("B", PipelineState.SKIPPED);
+    }
 }
