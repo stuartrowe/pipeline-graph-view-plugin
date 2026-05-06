@@ -19,9 +19,9 @@ export interface InputStep {
 }
 
 export interface BuildStep {
-  classicUrl: string;
-  pipelineViewUrl: string;
+  url: string;
   displayName: string;
+  runUrl: string;
 }
 
 export interface AllStepsData {

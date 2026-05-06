@@ -4,7 +4,7 @@ import net.sf.json.JSONObject;
 import net.sf.json.JsonConfig;
 import net.sf.json.processors.JsonBeanProcessor;
 
-public record PipelineBuildStep(String classicUrl, String pipelineViewUrl, String displayName) {
+public record PipelineBuildStep(String url, String displayName, String runUrl) {
     public static class PipelineBuildStepJsonProcessor implements JsonBeanProcessor {
         @Override
         public JSONObject processBean(Object bean, JsonConfig jsonConfig) {
@@ -12,9 +12,9 @@ public record PipelineBuildStep(String classicUrl, String pipelineViewUrl, Strin
                 return null;
             }
             JSONObject json = new JSONObject();
-            json.element("classicUrl", build.classicUrl());
-            json.element("pipelineViewUrl", build.pipelineViewUrl());
-            json.element("displayName", build.displayName());
+            json.element("url", build.url());
+            json.element("displayName", build.displayName());        
+            json.element("runUrl", build.runUrl());
             return json;
         }
 

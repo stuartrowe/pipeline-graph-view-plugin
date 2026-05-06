@@ -1,10 +1,12 @@
 package io.jenkins.plugins.pipelinegraphview.utils;
 
 import hudson.model.Run;
-import io.jenkins.plugins.pipelinegraphview.consoleview.PipelineConsoleViewAction;
+import io.jenkins.plugins.pipelinegraphview.PipelineGraphDisplayURLProvider;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.jenkinsci.plugins.displayurlapi.ClassicDisplayURLProvider;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.support.steps.input.InputStep;
 import org.slf4j.Logger;
@@ -87,9 +89,10 @@ public class PipelineStepApi {
         if (downstreamBuildRun == null) {
             return null;
         }
-        String classicUrl = downstreamBuildRun.getUrl();
-        String pipelineViewUrl = classicUrl + PipelineConsoleViewAction.URL_NAME;
-        return new PipelineBuildStep(classicUrl, pipelineViewUrl, downstreamBuildRun.getFullDisplayName());
+        return new PipelineBuildStep(
+                new PipelineGraphDisplayURLProvider().getRunURL(downstreamBuildRun),
+                downstreamBuildRun.getFullDisplayName(),
+                new ClassicDisplayURLProvider().getRunURL(downstreamBuildRun));
     }
 
     static String cleanTextContent(String text) {

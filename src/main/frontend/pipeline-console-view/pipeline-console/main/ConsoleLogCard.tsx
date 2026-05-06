@@ -26,6 +26,7 @@ import {
   StepLogBufferInfo,
   TAIL_CONSOLE_LOG,
 } from "./PipelineConsoleModel.tsx";
+import BuildStep from "./steps/BuildStep.tsx";
 import InputStep from "./steps/InputStep.tsx";
 
 const ConsoleLogStream = lazy(() => import("./ConsoleLogStream.tsx"));
@@ -143,20 +144,22 @@ export default function ConsoleLogCard({
         </Tooltip>
       </div>
 
-      {isExpanded && (
-        <ConsoleLogBody
-          tailLogs={tailLogs}
-          scrollToTail={scrollToTail}
-          stopTailingLogs={stopTailingLogs}
-          stepId={step.id}
-          stepState={step.state}
-          stepBuffers={stepBuffers}
-          fetchLogText={fetchLogText}
-          fetchExceptionText={fetchExceptionText}
-          onStepToggle={onStepToggle}
-          buildStep={step.buildStep}
-        />
-      )}
+      {isExpanded &&
+        (step.buildStep ? (
+          <BuildStep step={step} />
+        ) : (
+          <ConsoleLogBody
+            tailLogs={tailLogs}
+            scrollToTail={scrollToTail}
+            stopTailingLogs={stopTailingLogs}
+            stepId={step.id}
+            stepState={step.state}
+            stepBuffers={stepBuffers}
+            fetchLogText={fetchLogText}
+            fetchExceptionText={fetchExceptionText}
+            onStepToggle={onStepToggle}
+          />
+        ))}
     </div>
   );
 }
