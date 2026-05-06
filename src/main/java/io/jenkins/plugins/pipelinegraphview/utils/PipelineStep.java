@@ -8,6 +8,7 @@ import net.sf.json.JsonConfig;
 public class PipelineStep extends AbstractPipelineNode {
     final String stageId;
     private final PipelineInputStep inputStep;
+    private final PipelineBuildStep buildStep;
     private final Map<String, Object> flags;
 
     public PipelineStep(
@@ -18,11 +19,13 @@ public class PipelineStep extends AbstractPipelineNode {
             String title,
             String stageId,
             PipelineInputStep inputStep,
+            PipelineBuildStep buildStep,
             TimingInfo timingInfo,
             Map<String, Object> flags) {
         super(id, name, state, type, title, timingInfo);
         this.stageId = stageId;
         this.inputStep = inputStep;
+        this.buildStep = buildStep;
         this.flags = flags;
     }
 
@@ -36,6 +39,7 @@ public class PipelineStep extends AbstractPipelineNode {
             baseConfigure(config);
             config.registerJsonBeanProcessor(PipelineStep.class, new PipelineStepJsonProcessor());
             PipelineInputStep.PipelineInputStepJsonProcessor.configure(config);
+            PipelineBuildStep.PipelineBuildStepJsonProcessor.configure(config);
         }
 
         @Override
@@ -48,6 +52,9 @@ public class PipelineStep extends AbstractPipelineNode {
             json.element("stageId", step.stageId);
             if (step.inputStep != null) {
                 json.element("inputStep", step.inputStep, jsonConfig);
+            }
+            if (step.buildStep != null) {
+                json.element("buildStep", step.buildStep, jsonConfig);
             }
             json.element("flags", step.flags);
             return json;

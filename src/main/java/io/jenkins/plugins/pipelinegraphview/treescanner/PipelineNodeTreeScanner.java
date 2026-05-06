@@ -2,6 +2,7 @@ package io.jenkins.plugins.pipelinegraphview.treescanner;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import hudson.model.Run;
 import io.jenkins.plugins.pipelinegraphview.analysis.TimingInfo;
 import io.jenkins.plugins.pipelinegraphview.utils.FlowNodeWrapper;
 import io.jenkins.plugins.pipelinegraphview.utils.NodeRunStatus;
@@ -25,6 +26,7 @@ import org.jenkinsci.plugins.workflow.graph.BlockStartNode;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.graphanalysis.DepthFirstScanner;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.jenkinsci.plugins.workflow.support.steps.build.DownstreamBuildAction;
 import org.jenkinsci.plugins.workflow.support.steps.input.InputAction;
 import org.jenkinsci.plugins.workflow.support.steps.input.InputStep;
 import org.jenkinsci.plugins.workflow.support.steps.input.InputStepExecution;
@@ -165,6 +167,7 @@ public class PipelineNodeTreeScanner {
 
         private final Logger logger = LoggerFactory.getLogger(GraphBuilder.class);
         private final InputAction inputAction;
+        private final DownstreamBuildAction downstreamBuildAction;
         private final boolean isDebugEnabled = logger.isDebugEnabled();
 
         /*
@@ -180,6 +183,7 @@ public class PipelineNodeTreeScanner {
             this.relationships = relationships;
             this.run = run;
             this.inputAction = run.getAction(InputAction.class);
+            this.downstreamBuildAction = run.getAction(DownstreamBuildAction.class);
             this.execution = execution;
             buildGraph();
         }
@@ -264,6 +268,7 @@ public class PipelineNodeTreeScanner {
                     wrappedNode.getStatus(),
                     wrappedNode.getTiming(),
                     wrappedNode.getInputStep(),
+                    wrappedNode.getDownstreamBuildRun(),
                     wrappedNode.getRun(),
                     wrappedNode.getType());
             FlowNodeWrapper closestParent = findParentNode(wrappedNode, stageMap);
@@ -506,7 +511,25 @@ public class PipelineNodeTreeScanner {
                 }
             }
 
-            return new FlowNodeWrapper(node, status, timing, inputStep, this.run);
+            Run<?, ?> downstreamBuildRun = null;
+            if (downstreamBuildAction != null && node instanceof StepAtomNode) {
+                String nodeId = node.getId();
+                downstreamBuildRun = downstreamBuildAction.getDownstreamBuilds().stream()
+                        .filter(db -> nodeId.equals(db.getFlowNodeId()))
+                        .findFirst()
+                        .map(db -> {
+                            try {
+                                return db.getBuild();
+                            } catch (Exception e) {
+                                logger.warn(
+                                        "Could not get downstream build run for node {}: {}", nodeId, e.getMessage());
+                                return null;
+                            }
+                        })
+                        .orElse(null);
+            }
+
+            return new FlowNodeWrapper(node, status, timing, inputStep, downstreamBuildRun, this.run);
         }
     }
 }

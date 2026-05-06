@@ -1,5 +1,6 @@
 package io.jenkins.plugins.pipelinegraphview.utils;
 
+import hudson.model.Run;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -62,6 +63,7 @@ public class PipelineStepApi {
                             title,
                             stageId,
                             mapInputStep(flowNodeWrapper.getInputStep()),
+                            mapBuildStep(flowNodeWrapper.getDownstreamBuildRun()),
                             flowNodeWrapper.getTiming(),
                             flags);
                 })
@@ -78,6 +80,13 @@ public class PipelineStepApi {
                 inputStep.getId(),
                 inputStep.getOk(),
                 !inputStep.getParameters().isEmpty());
+    }
+
+    private PipelineBuildStep mapBuildStep(Run<?, ?> downstreamBuildRun) {
+        if (downstreamBuildRun == null) {
+            return null;
+        }
+        return new PipelineBuildStep("/" + downstreamBuildRun.getUrl(), downstreamBuildRun.getFullDisplayName());
     }
 
     static String cleanTextContent(String text) {
