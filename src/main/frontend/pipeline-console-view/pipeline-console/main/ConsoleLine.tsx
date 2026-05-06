@@ -3,6 +3,7 @@ import { memo } from "react";
 
 import { linkifyJsOptions } from "../../../common/utils/linkify-js.ts";
 import { makeReactChildren, tokenizeANSIString } from "./Ansi.tsx";
+import { BuildStep } from "../../../common/RestClient.tsx";
 
 export interface ConsoleLineProps {
   stopTailingLogs: () => void;
@@ -10,12 +11,21 @@ export interface ConsoleLineProps {
   content: string;
   stepId: string;
   startByte: number;
+  buildStep?: BuildStep;
 }
 
 // Console output line
 export const ConsoleLine = memo(function ConsoleLine(props: ConsoleLineProps) {
   const baseURL = `?start-byte=${props.startByte}&selected-node=${props.stepId}`;
   const id = `log-${props.stepId}-${props.lineNumber}`;
+  let content = props.content;
+  if (props.buildStep) {
+    const classicUrl = props.buildStep?.classicUrl;
+    const pipelineViewUrl = props.buildStep?.pipelineViewUrl;
+    if (classicUrl && pipelineViewUrl) {
+      content = content.replace(classicUrl, pipelineViewUrl); 
+    }
+  }
   return (
     <pre
       style={{ background: "none", border: "none" }}
@@ -44,7 +54,7 @@ export const ConsoleLine = memo(function ConsoleLine(props: ConsoleLineProps) {
         </a>
         <div className="console-text">
           {makeReactChildren(
-            tokenizeANSIString(linkifyHtml(props.content, linkifyJsOptions)),
+            tokenizeANSIString(linkifyHtml(content, linkifyJsOptions)),
             id,
           )}
         </div>
