@@ -151,7 +151,7 @@ public class PipelineGraphApi {
 
                 // For parallel stages the stage wrapper sits three levels above the workspace
                 // node (branch → parallel block → sub-stage → workspace).
-                if (flowNodeWrapper.getType() == FlowNodeWrapper.NodeType.PARALLEL) {
+                if (flowNodeWrapper.isParallelBranch()) {
                     if (enclosingIdsByNodeId != null) {
                         if (nEnclosingIds.size() >= 3) {
                             isWorkspaceNode = Objects.equals(flowNode.getId(), nEnclosingIds.get(2));

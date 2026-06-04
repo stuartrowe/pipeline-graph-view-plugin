@@ -393,6 +393,10 @@ public class FlowNodeWrapper {
         return this.type == NodeType.STEPS_BLOCK;
     }
 
+    public boolean isParallelBranch() {
+        return this.type == NodeType.PARALLEL;
+    }
+
     /*
      * public boolean isExecuted() {
      * return NotExecutedNodeAction.isExecuted(node);

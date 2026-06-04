@@ -104,7 +104,7 @@ public class PipelineNodeGraphAdapter implements PipelineGraphBuilderApi, Pipeli
                     // If the node has a parent which is a parallel branch, with the same name and
                     // has only one child (this node) then remap child nodes to that parent.
                     // This removes some superfluous stages in parallel branches.
-                    if (parent.getType() == FlowNodeWrapper.NodeType.PARALLEL
+                    if (parent.isParallelBranch()
                             && childrenCount.get(parent.getId()) == 1
                             && node.getDisplayName().equals(parent.getDisplayName())) {
                         if (isDebugEnabled) {

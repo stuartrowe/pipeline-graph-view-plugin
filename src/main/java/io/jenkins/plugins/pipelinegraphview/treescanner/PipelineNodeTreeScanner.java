@@ -308,7 +308,7 @@ public class PipelineNodeTreeScanner {
             // We also want to drop steps blocks - as the front-end doesn't expect them.
             // For the future: Adding Step Blocks as stages might be a good way to handle them in the
             // future.
-            return !shouldBeInStepMap(n) && !isStartNode(n) && !n.isStepsBlock();
+            return !shouldBeInStepMap(n) && !isStartNode(n) && !n.isStepsBlock() && !n.isParallelBranch();
         }
 
         /*
