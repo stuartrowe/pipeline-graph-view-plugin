@@ -109,7 +109,8 @@ public class NodeRelationship {
         boolean skippedStage = PipelineNodeUtil.isSkippedStage(start);
         if (skippedStage) {
             return new NodeRunStatus(BlueRun.BlueRunResult.NOT_BUILT, BlueRun.BlueRunState.SKIPPED);
-        } else if (PipelineNodeUtil.isPaused(this.end)) {
+        } else if (PipelineNodeUtil.isPaused(this.end)
+                || (this.end.isActive() && PipelineNodeUtil.isExecutionPaused(this.end))) {
             return new NodeRunStatus(BlueRun.BlueRunResult.UNKNOWN, BlueRun.BlueRunState.PAUSED);
         } else if (!PipelineNodeUtil.isActive(start) && PipelineNodeUtil.isStage(start)) {
             WarningAction warningAction = start.getPersistentAction(WarningAction.class);
@@ -154,7 +155,8 @@ public class NodeRelationship {
         if (PipelineNodeUtil.isSkippedStage(start)) {
             return new NodeRunStatus(BlueRun.BlueRunResult.NOT_BUILT, BlueRun.BlueRunState.SKIPPED);
         }
-        if (PipelineNodeUtil.isPaused(this.end)) {
+        if (PipelineNodeUtil.isPaused(this.end)
+                || (activeNodeIds.contains(this.end.getId()) && PipelineNodeUtil.isExecutionPaused(this.end))) {
             return new NodeRunStatus(BlueRun.BlueRunResult.UNKNOWN, BlueRun.BlueRunState.PAUSED);
         }
         if (!PipelineNodeUtil.isActive(start) && PipelineNodeUtil.isStage(start)) {

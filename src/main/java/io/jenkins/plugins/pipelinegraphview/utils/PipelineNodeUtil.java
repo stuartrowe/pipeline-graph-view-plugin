@@ -27,6 +27,7 @@ import org.jenkinsci.plugins.workflow.actions.QueueItemAction;
 import org.jenkinsci.plugins.workflow.actions.TagsAction;
 import org.jenkinsci.plugins.workflow.actions.ThreadNameAction;
 import org.jenkinsci.plugins.workflow.cps.nodes.StepAtomNode;
+import org.jenkinsci.plugins.workflow.cps.CpsFlowExecution;
 import org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode;
 import org.jenkinsci.plugins.workflow.cps.steps.ParallelStep;
 import org.jenkinsci.plugins.workflow.flow.FlowExecution;
@@ -290,6 +291,20 @@ public class PipelineNodeUtil {
     public static boolean isPaused(@NonNull FlowNode step) {
         PauseAction pauseAction = step.getAction(PauseAction.class);
         return (pauseAction != null && pauseAction.isPaused());
+    }
+
+    /**
+     * Checks if the execution this node belongs to is paused.
+     *
+     * @param node the flow node to check
+     * @return true if the execution is paused (via CpsFlowExecution.isPaused())
+     */
+    public static boolean isExecutionPaused(@NonNull FlowNode node) {
+        FlowExecution execution = node.getExecution();
+        if (execution instanceof CpsFlowExecution) {
+            return ((CpsFlowExecution) execution).isPaused();
+        }
+        return false;
     }
 
     protected static boolean isParallelBlock(@NonNull FlowNode node) {
